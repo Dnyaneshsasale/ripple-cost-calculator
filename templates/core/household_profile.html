@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h2>Household Profile</h2>
+<form method="post">
+    {% csrf_token %}
+    <label>Members count:</label>
+    <input type="number" name="members_count" value="{{ profile.members_count }}" min="1">
+
+    <label>Income bracket:</label>
+    <select name="income_bracket">
+        <option value="low" {% if profile.income_bracket == 'low' %}selected{% endif %}>Low</option>
+        <option value="mid" {% if profile.income_bracket == 'mid' %}selected{% endif %}>Middle</option>
+        <option value="high" {% if profile.income_bracket == 'high' %}selected{% endif %}>High</option>
+    </select>
+
+    <label>Diet type:</label>
+    <select name="diet_type">
+        <option value="veg" {% if profile.diet_type == 'veg' %}selected{% endif %}>Vegetarian</option>
+        <option value="nonveg" {% if profile.diet_type == 'nonveg' %}selected{% endif %}>Non Vegetarian</option>
+        <option value="fish" {% if profile.diet_type == 'fish' %}selected{% endif %}>Fish-heavy</option>
+    </select>
+
+    <label>City:</label>
+    <select name="city">
+        <option value="">--Select city--</option>
+        {% for city in cities %}
+            <option value="{{ city.id }}" {% if profile.city and profile.city.id == city.id %}selected{% endif %}>
+                {{ city.name }}, {{ city.state }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" class="btn-primary">Save & Continue</button>
+</form>
+{% endblock %}

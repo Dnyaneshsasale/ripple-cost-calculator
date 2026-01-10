@@ -1,0 +1,107 @@
+{% extends "core/base.html" %}
+{% block content %}
+<style>
+.map-hero { 
+    text-align: center; padding: 3rem 2rem; 
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), transparent);
+    border-radius: 24px; margin-bottom: 2rem;
+}
+.map-container { 
+    height: 600px; border-radius: 24px; 
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15); overflow: hidden;
+    margin-bottom: 2rem;
+}
+.legend { 
+    display: flex; justify-content: center; gap: 2rem; 
+    background: white; padding: 2rem; border-radius: 20px;
+}
+.legend-item { text-align: center; }
+.legend-color { 
+    width: 40px; height: 40px; border-radius: 50%; 
+    margin: 0 auto 0.5rem; border: 3px solid white;
+}
+</style>
+
+<div class="map-hero">
+    <h1>🗺️ India Environmental Impact Map</h1>
+    <p>City colors show ripple vulnerability (red=coastal/high risk)</p>
+</div>
+
+<div id="mapContainer" class="map-container"></div>
+
+<div class="legend">
+    <div class="legend-item">
+        <div class="legend-color" style="background: #bef264;"></div>
+        <div>Low Risk (Inland)</div>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #f59e0b;"></div>
+        <div>Medium Risk</div>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #ef4444;"></div>
+        <div>High Risk (Coastal)</div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script>
+// Professional India Map
+const map = L.map('mapContainer').setView([22.0, 79.0], 5);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// India cities with REAL coordinates + pollution proxy
+const cities = [
+    {name: "Mumbai", lat: 19.0760, lng: 72.8777, is_coastal: true, pollution: 173, risk: "High"},
+    {name: "Delhi", lat: 28.7041, lng: 77.1025, is_coastal: false, pollution: 456, risk: "Very High"},
+    {name: "Chennai", lat: 13.0827, lng: 80.2707, is_coastal: true, pollution: 177, risk: "High"},
+    {name: "Bangalore", lat: 12.9716, lng: 77.5946, is_coastal: false, pollution: 132, risk: "Moderate"},
+    {name: "Pune", lat: 18.5204, lng: 73.8567, is_coastal: false, pollution: 248, risk: "High"},
+    {name: "Hyderabad", lat: 17.3850, lng: 78.4867, is_coastal: false, pollution: 192, risk: "High"},
+    {name: "Kolkata", lat: 22.5726, lng: 88.3639, is_coastal: true, pollution: 228, risk: "Very High"},
+    {name: "Ahmedabad", lat: 23.0225, lng: 72.5714, is_coastal: false, pollution: 154, risk: "Moderate"},
+    {name: "Bhiwandi", lat: 19.0728, lng: 73.1326, is_coastal: false, pollution: 200, risk: "High"}
+];
+
+cities.forEach(city => {
+    // Color by risk/pollution
+    const color = city.is_coastal ? '#ef4444' : 
+                  city.pollution > 200 ? '#f97316' : '#10b981';
+    
+    const circle = L.circleMarker([city.lat, city.lng], {
+        radius: Math.max(8, city.pollution / 20),
+        fillColor: color,
+        color: "#ffffff",
+        weight: 4,
+        opacity: 1,
+        fillOpacity: 0.85
+    }).addTo(map);
+    
+    circle.bindPopup(`
+        <div style="min-width: 200px;">
+            <h3 style="margin: 0 0 0.5rem 0; color: #1f293b;">${city.name}</h3>
+            <p><strong>AQI:</strong> ${city.pollution}</p>
+            <p><strong>Risk:</strong> <span style="color: ${color}; font-weight: bold;">${city.risk}</span></p>
+            <p><strong>Ripple Multiplier:</strong> ${city.is_coastal ? '1.8x' : '1.2x'}</p>
+        </div>
+    `);
+    
+    // Click to center map
+    circle.on('click', function() {
+        map.setView([city.lat, city.lng], 10);
+    });
+});
+
+// Add pollution heatmap effect
+const heatData = cities.map(city => [city.lat, city.lng, city.pollution]);
+L.heatLayer(heatData, {
+    radius: 30,
+    blur: 20,
+    maxZoom: 10
+}).addTo(map);
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h2>Ripple Results (per year)</h2>
+
+<div class="cards">
+    <div class="card">
+        <h3>Plastic Ripple Cost</h3>
+        <p>₹ {{ total_plastic_cost }}</p>
+    </div>
+    <div class="card">
+        <h3>Fashion Ripple Cost</h3>
+        <p>₹ {{ total_fashion_cost }}</p>
+    </div>
+    <div class="card">
+        <h3>Transport Ripple Cost</h3>
+        <p>₹ {{ total_transport_cost }}</p>
+    </div>
+</div>
+
+<h2>5-Year Total Ripple Cost</h2>
+<p class="big-number">₹ {{ total_cost_5y }}</p>
+
+<canvas id="resultsChart" width="400" height="200"></canvas>
+{% endblock %}
